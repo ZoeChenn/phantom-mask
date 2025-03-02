@@ -115,18 +115,13 @@ class PharmacyController extends Controller
     // 2. 列出特定藥局販售的所有口罩
     public function getPharmacyMasks(Request $request, $id)
     {
-        $validation = $this->validateRequest($request);
-        
-        if ($validation !== true) {
-            return $validation;
-        }
 
         try {
             $pharmacy = Pharmacy::findOrFail($id);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'message' => '找不到指定的藥局',
-                'requested_id' => $request->route('id'),
+                'requested_id' => (int)$request->route('id'),
                 'status' => 'error'
             ], 404);
         }

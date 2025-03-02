@@ -276,36 +276,24 @@
                                         "masks": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/Mask"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "無效的參數請求",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "無效的參數請求"
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "sort": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "排序參數必須是 price 或 name"
+                                                "type": "object",
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/Mask"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "price": {
+                                                                "description": "口罩在該藥局的價格",
+                                                                "type": "string",
+                                                                "format": "decimal",
+                                                                "example": "7.05"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
-                                                }
-                                            },
-                                            "type": "object"
+                                                ]
+                                            }
                                         }
                                     },
                                     "type": "object"

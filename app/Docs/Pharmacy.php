@@ -82,19 +82,21 @@ use OpenApi\Annotations as OA;
  *             @OA\Property(
  *                 property="masks",
  *                 type="array",
- *                 @OA\Items(ref="#/components/schemas/Mask")
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="無效的參數請求",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="無效的參數請求"),
- *             @OA\Property(
- *                 property="errors",
- *                 type="object",
- *                 @OA\Property(property="sort", type="array", @OA\Items(type="string", example="排序參數必須是 price 或 name"))
+ *                 @OA\Items(
+ *                     type="object",
+ *                     allOf={
+ *                         @OA\Schema(ref="#/components/schemas/Mask"),
+ *                         @OA\Schema(
+ *                             @OA\Property(
+ *                                 property="price",
+ *                                 type="string",
+ *                                 format="decimal",
+ *                                 example="7.05",
+ *                                 description="口罩在該藥局的價格"
+ *                             )
+ *                         )
+ *                     }
+ *                 )
  *             )
  *         )
  *     ),

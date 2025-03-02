@@ -1,0 +1,1171 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Phantom Mask API",
+        "description": "API for managing pharmacies, masks, and purchases",
+        "contact": {
+            "email": "rouyucc@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/": {},
+        "/api/customers/top/{count}": {
+            "get": {
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "統計指定日期區間購買口罩總金額最高的前 X 名使用者",
+                "description": "回傳在指定日期範圍內，依照購買總金額排名的前幾名顧客列表。",
+                "operationId": "getTopCustomers",
+                "parameters": [
+                    {
+                        "name": "count",
+                        "in": "path",
+                        "description": "要列出前幾名顧客",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "開始日期 (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "結束日期 (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "顧客排名列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "John Doe"
+                                            },
+                                            "total_amount": {
+                                                "description": "指定日期範圍內的總交易金額",
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 123.45
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "無效的參數請求",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無效的參數請求"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "start_date": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "開始日期欄位必填"
+                                                    }
+                                                },
+                                                "end_date": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": [
+                                                            "結束日期欄位必填",
+                                                            "結束日期必須等於或晚於開始日期"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pharmacies": {
+            "get": {
+                "tags": [
+                    "Pharmacies"
+                ],
+                "summary": "列出特定時間和星期幾營業的藥局",
+                "description": "回傳在指定日期和時間營業的藥局列表。",
+                "operationId": "getPharmacyByOpenHour",
+                "parameters": [
+                    {
+                        "name": "day",
+                        "in": "query",
+                        "description": "星期幾（1-7，其中 1 代表星期一）",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 7,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "time",
+                        "in": "query",
+                        "description": "24 小時制時間格式（HH:MM）",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "time"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "藥局列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "description": "藥局 ID",
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "description": "藥局名稱",
+                                                "type": "string",
+                                                "example": "健康藥局"
+                                            },
+                                            "day_of_week": {
+                                                "description": "營業日",
+                                                "type": "string",
+                                                "example": "Monday"
+                                            },
+                                            "open_time": {
+                                                "description": "開始營業時間",
+                                                "type": "string",
+                                                "example": "09:00"
+                                            },
+                                            "close_time": {
+                                                "description": "結束營業時間",
+                                                "type": "string",
+                                                "example": "18:00"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "無效的參數請求",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無效的參數請求"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "day": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "日期欄位必填"
+                                                    }
+                                                },
+                                                "time": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "時間欄位必填"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pharmacies/{id}/masks": {
+            "get": {
+                "tags": [
+                    "Pharmacies"
+                ],
+                "summary": "列出特定藥局販售的所有口罩",
+                "description": "回傳指定藥局及其銷售的口罩列表，口罩列表依價格由小至大排序。",
+                "operationId": "getPharmacyMasks",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "藥局 ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "口罩列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "pharmacy_id": {
+                                            "description": "藥局 ID",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "pharmacy_name": {
+                                            "description": "藥局名稱",
+                                            "type": "string",
+                                            "example": "健康藥局"
+                                        },
+                                        "masks": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Mask"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "無效的參數請求",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無效的參數請求"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "sort": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "排序參數必須是 price 或 name"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "找不到藥局",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "找不到指定的藥局"
+                                        },
+                                        "requested_id": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pharmacies/filter": {
+            "get": {
+                "tags": [
+                    "Pharmacies"
+                ],
+                "summary": "列出特定價格範圍內有超過或少於 x 種口罩產品的藥局",
+                "description": "根據藥局販售的口罩種類數量和價格範圍來過濾藥局，回傳符合條件的藥局及其銷售的口罩詳細資料。",
+                "operationId": "getPharmaciesByMaskFilter",
+                "parameters": [
+                    {
+                        "name": "mask_count",
+                        "in": "query",
+                        "description": "口罩數量",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "comparison",
+                        "in": "query",
+                        "description": "比較方式：超過(more)或少於(less)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "more",
+                                "less"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "min_price",
+                        "in": "query",
+                        "description": "最低價格",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "max_price",
+                        "in": "query",
+                        "description": "最高價格",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "minimum": 0.01
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "帶有口罩詳細資料的藥局列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "description": "藥局 ID",
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "description": "藥局名稱",
+                                                "type": "string",
+                                                "example": "健康藥局"
+                                            },
+                                            "mask_count": {
+                                                "description": "符合過濾條件的口罩數量",
+                                                "type": "integer",
+                                                "example": 5
+                                            },
+                                            "masks": {
+                                                "description": "符合條件的口罩列表",
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "description": "口罩 ID",
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "brand": {
+                                                            "description": "口罩品牌",
+                                                            "type": "string",
+                                                            "example": "3M"
+                                                        },
+                                                        "color": {
+                                                            "description": "口罩顏色",
+                                                            "type": "string",
+                                                            "example": "白色"
+                                                        },
+                                                        "quantity_per_pack": {
+                                                            "description": "每包口罩數量",
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "price": {
+                                                            "description": "口罩價格",
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 25.5
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "無效的參數請求",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無效的參數請求"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "mask_count": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "口罩數量必須是整數"
+                                                    }
+                                                },
+                                                "comparison": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "比較方式必須是：超過(more)或少於(less)"
+                                                    }
+                                                },
+                                                "min_price": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "最低價格必須是正數"
+                                                    }
+                                                },
+                                                "max_price": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "最高價格必須是正數"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/purchases": {
+            "post": {
+                "tags": [
+                    "Purchases"
+                ],
+                "summary": "處理使用者購買口罩的交易",
+                "description": "處理顧客從藥局購買口罩的交易。驗證資金是否充足，更新顧客餘額和藥局餘額，並建立購買記錄。",
+                "operationId": "buyMask",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "customer_id",
+                                    "pharmacy_id",
+                                    "mask_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "customer_id": {
+                                        "description": "進行購買的顧客 ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "pharmacy_id": {
+                                        "description": "銷售口罩的藥局 ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "mask_id": {
+                                        "description": "被購買的口罩 ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantity": {
+                                        "description": "購買的口罩數量",
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "購買成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "狀態訊息",
+                                            "type": "string",
+                                            "example": "購買成功"
+                                        },
+                                        "transaction": {
+                                            "description": "交易詳情",
+                                            "properties": {
+                                                "transaction_id": {
+                                                    "description": "交易 ID",
+                                                    "type": "integer",
+                                                    "example": 123
+                                                },
+                                                "transaction_date": {
+                                                    "description": "交易日期時間",
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2021-01-13 01:18:23"
+                                                },
+                                                "transaction_amount": {
+                                                    "description": "交易總金額",
+                                                    "type": "number",
+                                                    "format": "decimal",
+                                                    "example": 12.99
+                                                },
+                                                "status": {
+                                                    "description": "交易狀態",
+                                                    "type": "string",
+                                                    "example": "success"
+                                                },
+                                                "mask_id": {
+                                                    "description": "購買的口罩 ID",
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "pharmacy_id": {
+                                                    "description": "銷售的藥局 ID",
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "price": {
+                                                    "description": "口罩單價",
+                                                    "type": "number",
+                                                    "format": "decimal",
+                                                    "example": 12.99
+                                                },
+                                                "quantity": {
+                                                    "description": "購買數量",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "customer": {
+                                            "description": "顧客資訊",
+                                            "properties": {
+                                                "customer_id": {
+                                                    "description": "顧客 ID",
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "previous_cash_balance": {
+                                                    "description": "交易前的現金餘額",
+                                                    "type": "number",
+                                                    "format": "decimal",
+                                                    "example": 100
+                                                },
+                                                "new_cash_balance": {
+                                                    "description": "交易後的現金餘額",
+                                                    "type": "number",
+                                                    "format": "decimal",
+                                                    "example": 87.01
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "無效的參數請求",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "錯誤訊息",
+                                            "type": "string",
+                                            "example": "無效的參數請求"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "customer_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "無此顧客 ID"
+                                                    }
+                                                },
+                                                "pharmacy_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "無此藥局 ID"
+                                                    }
+                                                },
+                                                "mask_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "無此口罩 ID"
+                                                    }
+                                                },
+                                                "quantity": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "數量不能小於 1"
+                                                    }
+                                                },
+                                                "pharmacy_mask": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "此藥局未提供該口罩"
+                                                    }
+                                                },
+                                                "cash_balance": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "資金不足"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "錯誤訊息",
+                                            "type": "string",
+                                            "example": "購買失敗: 資料庫錯誤"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/search": {
+            "get": {
+                "tags": [
+                    "Search"
+                ],
+                "summary": "以關鍵字搜尋藥局或口罩名稱，並依相關性排序",
+                "description": "以關鍵字搜尋藥局名稱或口罩品牌，結果會依照相關性排序。搜尋結果會包含藥局和口罩，並標記其類型。",
+                "operationId": "getPharmacyAndMaskbyName",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "關鍵字（至少 2 個字元）",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "minLength": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜尋結果",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "oneOf": [
+                                            {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "藥局 ID",
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "name": {
+                                                        "description": "藥局名稱",
+                                                        "type": "string",
+                                                        "example": "First Care Rx"
+                                                    },
+                                                    "cash_balance": {
+                                                        "description": "現金餘額",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": "222.52"
+                                                    },
+                                                    "result_type": {
+                                                        "description": "結果類型標記",
+                                                        "type": "string",
+                                                        "example": "pharmacy"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "口罩 ID",
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "brand": {
+                                                        "description": "口罩品牌",
+                                                        "type": "string",
+                                                        "example": "3M"
+                                                    },
+                                                    "color": {
+                                                        "description": "口罩顏色",
+                                                        "type": "string",
+                                                        "example": "白色"
+                                                    },
+                                                    "price": {
+                                                        "description": "口罩價格",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 25.5
+                                                    },
+                                                    "quantity_per_pack": {
+                                                        "description": "每包數量",
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "result_type": {
+                                                        "description": "結果類型標記",
+                                                        "type": "string",
+                                                        "example": "mask"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "無效的輸入",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "關鍵字欄位必填"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "驗證錯誤",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "提供的資料無效。"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "q": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "關鍵字欄位必須至少有 2 個字元。"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/statistics": {
+            "get": {
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "統計特定日期區間內的口罩銷售數量和總金額",
+                "description": "計算並回傳指定日期範圍內售出的口罩總數量和交易總金額。",
+                "operationId": "getMaskSales",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "開始日期 (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "結束日期 (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "統計資料",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_masks": {
+                                            "description": "售出的口罩總數量",
+                                            "type": "integer",
+                                            "example": 150
+                                        },
+                                        "total_value": {
+                                            "description": "日期範圍內所有交易的總金額",
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 1234.56
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "無效的參數請求",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "無效的參數請求"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "start_date": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "開始日期欄位必填"
+                                                    }
+                                                },
+                                                "end_date": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": [
+                                                            "結束日期欄位必填",
+                                                            "結束日期必須等於或晚於開始日期"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Pharmacy": {
+                "title": "Pharmacy",
+                "description": "藥局",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "藥局名稱",
+                        "type": "string",
+                        "example": "Keystone Pharmacy"
+                    },
+                    "cash_balance": {
+                        "description": "藥局現金餘額",
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 1000
+                    }
+                },
+                "type": "object"
+            },
+            "Mask": {
+                "title": "Mask",
+                "description": "口罩",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "brand": {
+                        "description": "口罩品牌",
+                        "type": "string",
+                        "example": "True Barrier"
+                    },
+                    "color": {
+                        "description": "口罩顏色",
+                        "type": "string",
+                        "example": "blue"
+                    },
+                    "quantity_per_pack": {
+                        "description": "每包口罩數量",
+                        "type": "integer",
+                        "example": 10
+                    }
+                },
+                "type": "object"
+            },
+            "Customer": {
+                "title": "Customer",
+                "description": "顧客",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "顧客姓名",
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "cash_balance": {
+                        "description": "顧客現金餘額",
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 100
+                    }
+                },
+                "type": "object"
+            },
+            "PurchaseHistory": {
+                "title": "Purchase History",
+                "description": "顧客的交易歷史紀錄",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "customer_id": {
+                        "description": "顧客 ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "pharmacy_id": {
+                        "description": "藥局 ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "mask_id": {
+                        "description": "口罩 ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "transaction_amount": {
+                        "description": "交易金額",
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 12.99
+                    },
+                    "transaction_date": {
+                        "description": "交易日期時間",
+                        "type": "string",
+                        "example": "2021-01-04 15:18:51"
+                    }
+                },
+                "type": "object"
+            },
+            "PharmacyMask": {
+                "title": "Pharmacy Mask",
+                "description": "藥局與口罩的關係，包含藥局特定的口罩價格",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "pharmacy_id": {
+                        "description": "藥局 ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "mask_id": {
+                        "description": "口罩 ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "price": {
+                        "description": "藥局特定的口罩價格",
+                        "type": "number",
+                        "format": "decimal",
+                        "example": 12.99
+                    }
+                },
+                "type": "object"
+            },
+            "PharmacyOpeningHour": {
+                "title": "Pharmacy Opening Hour",
+                "description": "藥局營業時間",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "pharmacy_id": {
+                        "description": "藥局 ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "day_of_week": {
+                        "description": "星期幾 (例如: Monday, Tuesday, Wednesday...)",
+                        "type": "string",
+                        "example": "Monday"
+                    },
+                    "open_time": {
+                        "description": "開始營業時間 (24小時制)",
+                        "type": "string",
+                        "format": "time",
+                        "example": "09:00:00"
+                    },
+                    "close_time": {
+                        "description": "結束營業時間 (24小時制)",
+                        "type": "string",
+                        "format": "time",
+                        "example": "18:00:00"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Customers",
+            "description": "和顧客有關的 API 們"
+        },
+        {
+            "name": "Pharmacies",
+            "description": "和藥局有關的 API 們"
+        },
+        {
+            "name": "Purchases",
+            "description": "和購買有關的 API 們"
+        },
+        {
+            "name": "Search",
+            "description": "和搜尋有關的 API 們"
+        },
+        {
+            "name": "Statistics",
+            "description": "和統計有關的 API 們"
+        }
+    ]
+}
